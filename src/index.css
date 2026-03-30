@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: #f9fafb;
+  color: #111827;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar fine */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
+
+/* ── Dark Mode ─────────────────────────────────── */
+html.dark body {
+  filter: invert(1) hue-rotate(180deg);
+  background: #111827;
+}
+/* Re-invert les images et vidéos pour qu'elles restent normales */
+html.dark img,
+html.dark video,
+html.dark iframe,
+html.dark canvas {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+@layer components {
+  .mi {
+    @apply w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all duration-200;
+    background: #f9fafb;
+    border: 1.5px solid #e5e7eb;
+    color: #111827;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+  }
+  .mi:focus {
+    border-color: #111827;
+    background: #ffffff;
+  }
+  .mi::placeholder { color: #9ca3af; }
+
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl text-sm outline-none transition-all duration-200;
+    background: #f9fafb;
+    border: 1.5px solid #e5e7eb;
+    color: #111827;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+  }
+  .input-field:focus {
+    border-color: #111827;
+    background: #ffffff;
+  }
+}
