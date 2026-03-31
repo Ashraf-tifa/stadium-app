@@ -51,33 +51,33 @@ export default function LandingPage() {
           backdropFilter: scrolled ? 'blur(20px)' : 'none',
           borderBottom: scrolled ? '1px solid rgba(74,222,128,0.08)' : 'none',
         }}>
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg, #4ade80, #16a34a)' }}>
               <Zap size={16} className="text-black" fill="black"/>
             </div>
-            <span className="font-black text-white text-lg">StadiumPro</span>
+            <span className="font-black text-white text-base sm:text-lg">StadiumPro</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button onClick={() => navigate('/auth')}
-              className="text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
+              className="hidden sm:block text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
               style={{ color: 'rgba(255,255,255,0.6)' }}
               onMouseEnter={e => e.currentTarget.style.color = 'white'}
               onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}>
               Connexion
             </button>
             <button onClick={() => navigate('/auth')}
-              className="text-sm font-black px-5 py-2 rounded-xl transition-all flex items-center gap-2"
+              className="text-xs sm:text-sm font-black px-3 sm:px-5 py-2 rounded-xl transition-all flex items-center gap-1.5 sm:gap-2"
               style={{ background: 'linear-gradient(135deg, #4ade80, #16a34a)', color: '#000' }}>
-              Commencer <ArrowRight size={14}/>
+              Commencer <ArrowRight size={13}/>
             </button>
           </div>
         </div>
       </nav>
 
       {/* ── Hero ── */}
-      <section className="min-h-screen flex flex-col items-center justify-center relative px-6 pt-20">
+      <section className="min-h-screen flex flex-col items-center justify-center relative px-4 sm:px-6 pt-20">
         {/* Grille */}
         <div className="absolute inset-0" style={{
           backgroundImage: `
@@ -106,7 +106,7 @@ export default function LandingPage() {
           <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             className="font-black leading-none mb-6"
-            style={{ fontSize: 'clamp(48px, 8vw, 88px)', lineHeight: 1.05 }}>
+            style={{ fontSize: 'clamp(36px, 8vw, 88px)', lineHeight: 1.05 }}>
             Votre terrain.<br/>
             <span style={{
               background: 'linear-gradient(135deg, #4ade80, #16a34a)',
@@ -119,7 +119,7 @@ export default function LandingPage() {
           {/* Sous-titre */}
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.25 }}
-            className="text-lg mb-10 max-w-2xl mx-auto leading-relaxed"
+            className="text-sm sm:text-lg mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed"
             style={{ color: 'rgba(255,255,255,0.5)' }}>
             Partagez un simple lien WhatsApp. Vos clients réservent eux-mêmes,
             voient les créneaux disponibles, et vous recevez les demandes instantanément.
@@ -153,7 +153,7 @@ export default function LandingPage() {
           {/* Stats */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="flex items-center justify-center gap-8 mt-14 flex-wrap">
+            className="flex items-center justify-center gap-5 sm:gap-8 mt-10 sm:mt-14 flex-wrap">
             {[
               { val: '500+',  label: 'Terrains'     },
               { val: '12K+',  label: 'Réservations' },
@@ -176,7 +176,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Comment ça marche ── */}
-      <section id="how" className="py-24 px-6">
+      <section id="how" className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#4ade80' }}>
@@ -207,9 +207,9 @@ export default function LandingPage() {
       </section>
 
       {/* ── Fonctionnalités ── */}
-      <section className="py-24 px-6" style={{ background: 'rgba(255,255,255,0.02)' }}>
+      <section className="py-16 sm:py-24 px-4 sm:px-6" style={{ background: 'rgba(255,255,255,0.02)' }}>
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12 sm:mb-16">
             <p className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#4ade80' }}>
               Tout ce qu'il vous faut
             </p>
@@ -244,9 +244,9 @@ export default function LandingPage() {
       </section>
 
       {/* ── Tarifs ── */}
-      <section className="py-24 px-6">
+      <section className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12 sm:mb-16">
             <p className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: '#4ade80' }}>
               Tarifs transparents
             </p>
@@ -312,12 +312,12 @@ export default function LandingPage() {
       </section>
 
       {/* ── Témoignages ── */}
-      <section className="py-24 px-6" style={{ background: 'rgba(255,255,255,0.02)' }}>
+      <section className="py-16 sm:py-24 px-4 sm:px-6" style={{ background: 'rgba(255,255,255,0.02)' }}>
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-black text-white">Ce qu'ils en disent</h2>
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl font-black text-white">Ce qu'ils en disent</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {[
               { name: 'Hassan B.', city: 'Casablanca', text: 'Avant je prenais les réservations sur WhatsApp et j\'oubliais. Maintenant tout est automatique.', stars: 5 },
               { name: 'Youssef M.', city: 'Marrakech', text: 'Le lien de réservation, c\'est vraiment simple. Mes clients l\'adorent. Je gère 3 terrains depuis un seul endroit.', stars: 5 },
@@ -347,10 +347,10 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA Final ── */}
-      <section className="py-24 px-6">
+      <section className="py-16 sm:py-24 px-4 sm:px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="max-w-3xl mx-auto rounded-3xl p-12 text-center relative overflow-hidden"
+          className="max-w-3xl mx-auto rounded-3xl p-6 sm:p-12 text-center relative overflow-hidden"
           style={{
             background: 'rgba(74,222,128,0.06)',
             border: '1px solid rgba(74,222,128,0.2)',

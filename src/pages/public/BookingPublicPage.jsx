@@ -100,7 +100,7 @@ export default function BookingPublicPage() {
 
       {/* ── Header ── */}
       <header className="bg-white sticky top-0 z-20" style={{ borderBottom: '1px solid #f0f0f0' }}>
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gray-900 flex items-center justify-center">
               <Zap size={16} className="text-green-400" fill="#4ade80"/>
@@ -116,7 +116,7 @@ export default function BookingPublicPage() {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-6 py-6 space-y-5">
+      <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-5">
 
         {/* Tabs */}
         <div className="flex gap-1 p-1 bg-white rounded-2xl" style={{ border: '1px solid #f0f0f0' }}>
@@ -158,7 +158,7 @@ export default function BookingPublicPage() {
                       onClick={() => setSelectedStadium(s)}>
 
                       {/* Image */}
-                      <div className="h-44 bg-gray-100 relative overflow-hidden">
+                      <div className="h-36 sm:h-44 bg-gray-100 relative overflow-hidden">
                         {s.images?.length > 0 ? (
                           <img src={s.images[0]} alt={s.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -321,6 +321,7 @@ function PublicBookingModal({ stadium, onClose }) {
   const [loadingBk, setLoadingBk]       = useState(true)
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedSlot, setSelectedSlot] = useState(null)
+  const [mobileDayOffset, setMobileDayOffset] = useState(0) // 0=Lun-Mer, 1=Jeu-Sam, 2=Dim
   const [form, setForm]               = useState({ name: '', phone: '' })
   const [submitting, setSubmitting]   = useState(false)
   const [error, setError]             = useState('')
@@ -345,7 +346,7 @@ function PublicBookingModal({ stadium, onClose }) {
       const d = new Date(weekStart); d.setDate(weekStart.getDate() + i); return d
     }), [weekStart])
 
-  useEffect(() => { loadWeekBookings() }, [weekOffset])
+  useEffect(() => { loadWeekBookings(); setMobileDayOffset(0) }, [weekOffset])
 
   // Charge les abonnés une seule fois
   useEffect(() => {
@@ -486,12 +487,12 @@ function PublicBookingModal({ stadium, onClose }) {
               <motion.div key="planning" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
 
                 {/* Navigation semaine */}
-                <div className="flex items-center justify-between px-4 py-3 bg-gray-50" style={{ borderBottom: '1px solid #f0f0f0' }}>
+                <div className="flex items-center justify-between px-3 sm:px-4 py-3 bg-gray-50" style={{ borderBottom: '1px solid #f0f0f0' }}>
                   <button onClick={() => setWeekOffset(w => w-1)} disabled={weekOffset <= 0}
                     className="p-2 rounded-xl hover:bg-white disabled:opacity-30 transition-all border border-gray-200">
                     <ChevronLeft size={16} className="text-gray-600"/>
                   </button>
-                  <p className="text-sm font-black text-gray-900">
+                  <p className="text-xs sm:text-sm font-black text-gray-900">
                     {weekDays[0].getDate()} {MO[weekDays[0].getMonth()]} — {weekDays[6].getDate()} {MO[weekDays[6].getMonth()]} {weekDays[6].getFullYear()}
                   </p>
                   <button onClick={() => setWeekOffset(w => w+1)}
@@ -500,8 +501,32 @@ function PublicBookingModal({ stadium, onClose }) {
                   </button>
                 </div>
 
+                {/* Navigation jours — mobile uniquement */}
+                <div className="flex sm:hidden items-center justify-between px-3 py-2 bg-white" style={{ borderBottom: '1px solid #f0f0f0' }}>
+                  <button onClick={() => setMobileDayOffset(d => Math.max(0, d-1))} disabled={mobileDayOffset === 0}
+                    className="p-1.5 rounded-lg border border-gray-200 disabled:opacity-30">
+                    <ChevronLeft size={14} className="text-gray-600"/>
+                  </button>
+                  <div className="flex gap-1">
+                    {[0,1,2].map(i => (
+                      <button key={i} onClick={() => setMobileDayOffset(i)}
+                        className="px-3 py-1 rounded-lg text-xs font-bold transition-all"
+                        style={{
+                          background: mobileDayOffset === i ? '#111827' : '#f3f4f6',
+                          color: mobileDayOffset === i ? '#fff' : '#6b7280',
+                        }}>
+                        {['Lun–Mer', 'Jeu–Sam', 'Dim'][i]}
+                      </button>
+                    ))}
+                  </div>
+                  <button onClick={() => setMobileDayOffset(d => Math.min(2, d+1))} disabled={mobileDayOffset === 2}
+                    className="p-1.5 rounded-lg border border-gray-200 disabled:opacity-30">
+                    <ChevronRight size={14} className="text-gray-600"/>
+                  </button>
+                </div>
+
                 {/* Légende */}
-                <div className="flex items-center gap-4 px-4 py-2 text-xs text-gray-500 flex-wrap" style={{ borderBottom: '1px solid #f0f0f0' }}>
+                <div className="flex items-center gap-2 sm:gap-4 px-3 sm:px-4 py-2 text-xs text-gray-500 flex-wrap" style={{ borderBottom: '1px solid #f0f0f0' }}>
                   <span className="flex items-center gap-1.5">
                     <span className="w-3 h-3 rounded bg-green-100 border border-green-300 inline-block"/>Disponible
                   </span>
@@ -522,18 +547,23 @@ function PublicBookingModal({ stadium, onClose }) {
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-xs border-collapse" style={{ minWidth: '480px' }}>
+                    <table className="w-full text-xs border-collapse">
                       <thead>
                         <tr style={{ borderBottom: '2px solid #f0f0f0' }}>
-                          <th className="w-10 px-2 py-3 text-left text-gray-400 font-semibold sticky left-0 bg-white z-10">h</th>
+                          <th className="w-8 sm:w-10 px-1 sm:px-2 py-3 text-left text-gray-400 font-semibold sticky left-0 bg-white z-10">h</th>
                           {weekDays.map((d, i) => {
                             const isToday = fmt(d) === fmt(new Date())
+                            // Sur mobile: afficher seulement 3 jours selon mobileDayOffset
+                            const mobileRanges = [[0,1,2],[3,4,5],[6]]
+                            const visibleOnMobile = mobileRanges[mobileDayOffset].includes(i)
                             return (
-                              <th key={i} className="px-1 py-2 text-center" style={{ minWidth: '58px' }}>
+                              <th key={i}
+                                className={`px-1 py-2 text-center ${visibleOnMobile ? '' : 'hidden sm:table-cell'}`}
+                                style={{ minWidth: '46px' }}>
                                 <div className={`text-xs font-semibold ${isToday ? 'text-green-600' : 'text-gray-400'}`}>
                                   {DS[d.getDay()]}
                                 </div>
-                                <div className={`text-base font-black leading-tight ${isToday ? 'text-green-600' : 'text-gray-900'}`}>
+                                <div className={`text-sm sm:text-base font-black leading-tight ${isToday ? 'text-green-600' : 'text-gray-900'}`}>
                                   {d.getDate()}
                                 </div>
                                 {isToday && <div className="w-1.5 h-1.5 rounded-full bg-green-500 mx-auto mt-0.5"/>}
@@ -545,17 +575,19 @@ function PublicBookingModal({ stadium, onClose }) {
                       <tbody>
                         {hours.map(hour => (
                           <tr key={hour} style={{ borderBottom: '1px solid #fafafa' }}>
-                            <td className="px-2 py-0.5 text-gray-400 font-mono font-semibold sticky left-0 bg-white z-10 text-xs whitespace-nowrap">
+                            <td className="px-1 sm:px-2 py-0.5 text-gray-400 font-mono font-semibold sticky left-0 bg-white z-10 text-xs whitespace-nowrap">
                               {String(hour).padStart(2,'0')}h
                             </td>
                             {weekDays.map((d, i) => {
+                              const mobileRanges = [[0,1,2],[3,4,5],[6]]
+                              const visibleOnMobile = mobileRanges[mobileDayOffset].includes(i)
                               const past      = isPast(d, hour)
                               const slot      = hasSlot(d, hour)
                               const recurring = slot && isRecurring(d, hour)
                               const booked    = slot && !recurring && isBooked(d, hour)
                               const available = slot && !booked && !recurring && !past
                               return (
-                                <td key={i} className="px-1 py-0.5 text-center">
+                                <td key={i} className={`px-1 py-0.5 text-center ${visibleOnMobile ? '' : 'hidden sm:table-cell'}`}>
                                   {!slot ? (
                                     <div className="h-9 rounded-lg bg-gray-50"/>
                                   ) : recurring ? (
