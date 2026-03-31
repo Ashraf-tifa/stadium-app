@@ -232,10 +232,33 @@ function BookingsHistory() {
                     <Users size={14} className="text-gray-500"/>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-gray-900">{b.profiles?.full_name || 'Client'}</p>
-                    <p className="text-xs text-gray-400">
-                      {b.stadiums?.name} · {b.booking_date} · {b.start_time?.slice(0,5)}–{b.end_time?.slice(0,5)}
-                    </p>
+                    {/* Row 1: name + phone */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-bold text-gray-900 truncate">
+                        {b.booker_name || b.profiles?.full_name || '—'}
+                      </span>
+                      {(b.booker_phone || b.profiles?.phone) && (
+                        <span className="flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full shrink-0">
+                          📞 {b.booker_phone || b.profiles?.phone}
+                        </span>
+                      )}
+                    </div>
+                    {/* Row 2: stadium · date · time */}
+                    <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                      {b.stadiums?.name && (
+                        <span className="text-xs font-semibold text-gray-500">{b.stadiums.name}</span>
+                      )}
+                      <span className="text-gray-300 text-xs">·</span>
+                      <span className="text-xs text-gray-500">{b.booking_date}</span>
+                      <span className="text-gray-300 text-xs">·</span>
+                      <span className="text-xs font-semibold text-gray-700">{b.start_time?.slice(0,5)}–{b.end_time?.slice(0,5)}</span>
+                    </div>
+                    {/* Row 3: réservé le */}
+                    {b.created_at && (
+                      <p className="text-xs text-gray-300 mt-0.5">
+                        Réservé le {new Date(b.created_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})} à {new Date(b.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}
+                      </p>
+                    )}
                   </div>
                   <p className="text-sm font-black text-gray-900 hidden sm:block">{b.total_price} DH</p>
                   <span className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full whitespace-nowrap ${s.cls}`}>

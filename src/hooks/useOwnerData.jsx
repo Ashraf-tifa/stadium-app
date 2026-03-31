@@ -161,7 +161,7 @@ export function useOwnerBookings() {
 
     const { data, error } = await supabase
       .from('bookings')
-      .select('id, booking_date, start_time, end_time, total_price, status, notes, stadium_id, stadiums(name, city), profiles:customer_id(full_name, phone)')
+      .select('id, booking_date, start_time, end_time, total_price, status, notes, booker_name, booker_phone, created_at, stadium_id, stadiums(name, city), profiles:customer_id(full_name, phone)')
       .in('stadium_id', stadiumIds)
       .order('booking_date', { ascending: false })
       .order('start_time',   { ascending: false })

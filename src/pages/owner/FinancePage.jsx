@@ -38,7 +38,7 @@ export default function FinancePage() {
 
       const { data: bks } = await supabase
         .from('bookings')
-        .select('*, stadiums(name), profiles:customer_id(full_name)')
+        .select('*, stadiums(name), profiles:customer_id(full_name, phone), booker_name, booker_phone')
         .in('stadium_id', ids)
         .order('booking_date', { ascending: false })
 
@@ -303,15 +303,22 @@ export default function FinancePage() {
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                     transition={{ delay: i * 0.03 }}
                     className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
                         <CheckCircle2 size={13} className="text-green-600"/>
                       </div>
-                      <div>
-                        <p className="text-sm font-bold text-gray-900">
-                          {b.profiles?.full_name || 'Client'}
-                        </p>
-                        <p className="text-xs text-gray-400">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-bold text-gray-900 truncate">
+                            {b.booker_name || b.profiles?.full_name || '—'}
+                          </span>
+                          {(b.booker_phone || b.profiles?.phone) && (
+                            <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full shrink-0">
+                              📞 {b.booker_phone || b.profiles?.phone}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-0.5">
                           {b.stadiums?.name} · {b.booking_date} · {b.start_time?.slice(0,5)}–{b.end_time?.slice(0,5)}
                         </p>
                       </div>

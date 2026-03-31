@@ -102,12 +102,22 @@ async function handleLogin(e) {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full"
           style={{ background: 'radial-gradient(circle, rgba(74,222,128,0.06) 0%, transparent 70%)' }}/>
 
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #4ade80, #16a34a)' }}>
-            <Zap size={20} className="text-black" fill="black"/>
-          </div>
-          <span className="text-white font-black text-xl">StadiumPro</span>
+        <div className="relative z-10 flex items-center gap-4">
+          <button onClick={() => navigate('/')}
+            className="flex items-center gap-3 group transition-all">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
+              style={{ background: 'linear-gradient(135deg, #4ade80, #16a34a)' }}>
+              <Zap size={20} className="text-black" fill="black"/>
+            </div>
+            <span className="text-white font-black text-xl group-hover:text-green-400 transition-colors">StadiumPro</span>
+          </button>
+          <button onClick={() => navigate('/')}
+            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all"
+            style={{ color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.08)' }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'rgba(74,222,128,0.3)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}>
+            ← Accueil
+          </button>
         </div>
 
         <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }}
@@ -144,12 +154,19 @@ async function handleLogin(e) {
           transition={{ duration: 0.5 }} className="w-full max-w-sm">
 
           {/* Logo mobile */}
-          <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #4ade80, #16a34a)' }}>
-              <Zap size={16} className="text-black" fill="black"/>
-            </div>
-            <span className="text-white font-black text-lg">StadiumPro</span>
+          <div className="lg:hidden flex items-center justify-between mb-8">
+            <button onClick={() => navigate('/')} className="flex items-center gap-2 group">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-transform group-hover:scale-110"
+                style={{ background: 'linear-gradient(135deg, #4ade80, #16a34a)' }}>
+                <Zap size={16} className="text-black" fill="black"/>
+              </div>
+              <span className="text-white font-black text-lg group-hover:text-green-400 transition-colors">StadiumPro</span>
+            </button>
+            <button onClick={() => navigate('/')}
+              className="text-xs font-semibold px-3 py-1.5 rounded-xl"
+              style={{ color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              ← Accueil
+            </button>
           </div>
 
           <div className="mb-8">

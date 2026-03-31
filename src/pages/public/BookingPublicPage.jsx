@@ -447,6 +447,8 @@ function PublicBookingModal({ stadium, onClose }) {
         end_time:     selectedSlot.end   + ':00',
         total_price:  stadium.price_per_hour,
         status:       'pending',
+        booker_name:  form.name.trim(),
+        booker_phone: form.phone.trim(),
         notes:        `Client: ${form.name} — Tél: ${form.phone}`,
       })
       if (error) throw error
@@ -678,8 +680,8 @@ function PublicBookingModal({ stadium, onClose }) {
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Téléphone *</label>
                   <div className="relative">
                     <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
-                    <input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})}
-                      placeholder="+212 6XX XXX XXX" required type="tel"
+                    <input value={form.phone} onChange={e => setForm({...form, phone: e.target.value.replace(/[^0-9+\s]/g, '')})}
+                      placeholder="+212 6XX XXX XXX" required type="tel" inputMode="numeric"
                       className="w-full pl-9 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-gray-900 text-sm font-medium text-gray-900 outline-none transition-all bg-gray-50 focus:bg-white"/>
                   </div>
                 </div>

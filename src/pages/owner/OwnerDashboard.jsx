@@ -7,7 +7,7 @@ import {
   CircleDollarSign, CheckCircle2, XCircle,
   Eye, Plus, Loader2, Users, Star, ToggleLeft, ToggleRight,
   AlertCircle, Trash2, Zap, History, CreditCard, Settings, Link,
-  Repeat, Phone, User, Clock, Moon, Sun
+  Repeat, Phone, User, Clock, Moon, Sun, Calendar, CalendarClock
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
@@ -52,37 +52,47 @@ function InactiveOwnerPage() {
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: "'Outfit', sans-serif" }}>
-      <header className="bg-white px-8 py-4 flex items-center justify-between"
+      {/* ── Header ── */}
+      <header className="bg-white px-4 sm:px-8 py-3 sm:py-4"
         style={{ borderBottom: '1px solid #f0f0f0' }}>
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gray-900 flex items-center justify-center">
-            <Zap size={15} className="text-green-400" fill="#4ade80"/>
+        {/* Ligne 1: Logo + Déconnexion */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gray-900 flex items-center justify-center">
+              <Zap size={15} className="text-green-400" fill="#4ade80"/>
+            </div>
+            <span className="font-black text-gray-900">StadiumPro</span>
           </div>
-          <span className="font-black text-gray-900">StadiumPro</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 flex items-center gap-1">
+              ⏳ <span className="hidden sm:inline">Compte en attente</span><span className="sm:hidden">En attente</span>
+            </span>
+            <button onClick={async () => { await signOut(); navigate('/auth') }}
+              className="text-xs text-gray-400 hover:text-red-500 font-semibold transition-colors flex items-center gap-1">
+              <LogOut size={13}/>
+              <span className="hidden sm:inline">Déconnexion</span>
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
+        {/* Ligne 2: Bouton actualiser (toute la largeur sur mobile) */}
+        <div className="mt-2">
           <button onClick={handleRefresh} disabled={refreshing}
-            className="text-xs font-bold px-3 py-1.5 rounded-full border border-green-200 text-green-600 hover:bg-green-50 transition-all flex items-center gap-1.5">
+            className="w-full sm:w-auto text-xs font-bold px-3 py-2 rounded-xl border border-green-200 text-green-600 hover:bg-green-50 transition-all flex items-center justify-center gap-1.5">
             {refreshing ? <Loader2 size={12} className="animate-spin"/> : '🔄'}
-            Actualiser mon statut
-          </button>
-          <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-amber-100 text-amber-700">
-            ⏳ Compte en attente
-          </span>
-          <button onClick={async () => { await signOut(); navigate('/auth') }}
-            className="text-xs text-gray-400 hover:text-red-500 font-semibold transition-colors flex items-center gap-1.5">
-            <LogOut size={13}/> Déconnexion
+            Actualiser mon statut après validation
           </button>
         </div>
       </header>
-      <div className="bg-amber-50 border-b border-amber-200 px-8 py-3 flex items-center gap-2">
-        <AlertCircle size={15} className="text-amber-600 shrink-0"/>
-        <p className="text-sm text-amber-800 font-medium">
-          Bonjour {profile?.full_name} — Votre compte est en attente d'activation.
-          Souscrivez un plan et envoyez votre reçu. Après approbation, cliquez sur "Actualiser mon statut".
+
+      {/* ── Bannière avertissement ── */}
+      <div className="bg-amber-50 border-b border-amber-200 px-4 sm:px-8 py-3 flex items-start gap-2">
+        <AlertCircle size={15} className="text-amber-600 shrink-0 mt-0.5"/>
+        <p className="text-xs sm:text-sm text-amber-800 font-medium">
+          Votre compte est en attente d'activation. Souscrivez un plan et envoyez votre reçu. Après approbation, cliquez sur <strong>"Actualiser mon statut"</strong>.
         </p>
       </div>
-      <div className="max-w-4xl mx-auto px-6 py-8">
+
+      <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
         <SubscriptionPage/>
       </div>
     </div>
@@ -183,15 +193,15 @@ export default function OwnerDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <button onClick={copyBookingLink}
-              className="hidden sm:flex items-center gap-2 px-3 py-2 text-xs font-bold border border-gray-200 hover:border-gray-900 rounded-xl transition-all text-gray-600">
-              <Link size={14}/> Copier mon lien
+              className="flex items-center gap-2 px-2 sm:px-3 py-2 text-xs font-bold border border-gray-200 hover:border-gray-900 rounded-xl transition-all text-gray-600">
+              <Link size={14}/> <span className="hidden sm:inline">Copier mon lien</span>
             </button>
             <NotificationsPanel onNavigate={setTab}/>
           </div>
         </header>
 
         {/* ✅ display:none بدل unmount — البيانات تُحمَّل مرة واحدة فقط */}
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-4 sm:p-8">
           <div style={{ display: tab === 'overview'     ? 'block' : 'none' }}><OverviewTab setTab={setTab}/></div>
           <div style={{ display: tab === 'stadiums'     ? 'block' : 'none' }}><StadiumsTab/></div>
           <div style={{ display: tab === 'bookings'     ? 'block' : 'none' }}><BookingsTab/></div>
@@ -729,13 +739,38 @@ function BookingRow({ booking: b, compact, onConfirm, onCancel }) {
   return (
     <div style={{ borderBottom: '1px solid #fafafa' }}>
       <div className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
             <Users size={13} className="text-gray-500"/>
           </div>
-          <div>
-            <p className="text-sm font-bold text-gray-900">{b.profiles?.full_name || 'Client'}</p>
-            <p className="text-xs text-gray-400">{b.stadiums?.name} · {b.booking_date} · {b.start_time?.slice(0,5)}–{b.end_time?.slice(0,5)}</p>
+          <div className="min-w-0">
+            {/* Row 1: name + phone */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm font-bold text-gray-900 truncate">
+                {b.booker_name || b.profiles?.full_name || '—'}
+              </span>
+              {(b.booker_phone || b.profiles?.phone) && (
+                <span className="flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full shrink-0">
+                  📞 {b.booker_phone || b.profiles?.phone}
+                </span>
+              )}
+            </div>
+            {/* Row 2: stadium · date · time */}
+            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+              {b.stadiums?.name && (
+                <span className="text-xs font-semibold text-gray-500">{b.stadiums.name}</span>
+              )}
+              <span className="text-gray-300 text-xs">·</span>
+              <span className="text-xs text-gray-500">{b.booking_date}</span>
+              <span className="text-gray-300 text-xs">·</span>
+              <span className="text-xs font-semibold text-gray-700">{b.start_time?.slice(0,5)}–{b.end_time?.slice(0,5)}</span>
+            </div>
+            {/* Row 3: réservé le */}
+            {b.created_at && (
+              <p className="text-xs text-gray-300 mt-0.5">
+                Réservé le {new Date(b.created_at).toLocaleDateString('fr-FR', { day:'2-digit', month:'short' })} à {new Date(b.created_at).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' })}
+              </p>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -800,7 +835,7 @@ function AbonnesTab() {
   const [loading, setLoading]             = useState(true)
   // Modal ajouter
   const [addModal, setAddModal]           = useState(null) // { day_of_week, hour }
-  const [addForm, setAddForm]             = useState({ player_name: '', player_phone: '' })
+  const [addForm, setAddForm]             = useState({ player_name: '', player_phone: '', start_date: '', end_date: '' })
   const [saving, setSaving]               = useState(false)
   // Modal conflit
   const [conflictModal, setConflictModal] = useState(null) // { existing }
@@ -858,8 +893,27 @@ function AbonnesTab() {
     const existing = getAbonne(dow, hour)
     if (existing) { setInfoModal(existing); return }
     if (!hasSlot(dow, hour)) return
+    const today = new Date().toISOString().split('T')[0]
     setAddModal({ day_of_week: dow, hour })
-    setAddForm({ player_name: '', player_phone: '' })
+    setAddForm({ player_name: '', player_phone: '', start_date: today, end_date: '' })
+  }
+
+  function applyDuration(months) {
+    const base = addForm.start_date || new Date().toISOString().split('T')[0]
+    const d = new Date(base)
+    d.setMonth(d.getMonth() + months)
+    setAddForm(f => ({ ...f, end_date: d.toISOString().split('T')[0] }))
+  }
+
+  function isExpired(ab) {
+    if (!ab.end_date) return false
+    return ab.end_date < new Date().toISOString().split('T')[0]
+  }
+
+  function daysLeft(ab) {
+    if (!ab.end_date) return null
+    const diff = Math.ceil((new Date(ab.end_date) - new Date()) / 86400000)
+    return diff
   }
 
   async function handleSave() {
@@ -874,6 +928,8 @@ function AbonnesTab() {
       end_time:     `${endH}:00`,
       player_name:  addForm.player_name.trim(),
       player_phone: addForm.player_phone.trim(),
+      start_date:   addForm.start_date || null,
+      end_date:     addForm.end_date   || null,
     })
     setSaving(false)
     if (error) { setAddModal(null); return }
@@ -916,12 +972,15 @@ function AbonnesTab() {
       )}
 
       {/* Légende */}
-      <div className="flex items-center gap-5 text-xs text-gray-500">
+      <div className="flex items-center gap-4 flex-wrap text-xs text-gray-500">
         <span className="flex items-center gap-1.5">
           <span className="w-3 h-3 rounded-md inline-block" style={{background:'#f0fdf4',border:'1px solid #86efac'}}/>Disponible
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-md inline-block" style={{background:'#eff6ff',border:'1px solid #bfdbfe'}}/>Abonné
+          <span className="w-3 h-3 rounded-md inline-block" style={{background:'#eff6ff',border:'1px solid #bfdbfe'}}/>Abonné actif
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-md inline-block" style={{background:'#f9fafb',border:'1px solid #e5e7eb'}}/>⚠ Expiré
         </span>
         <span className="flex items-center gap-1.5">
           <span className="w-3 h-3 rounded-md bg-gray-100 inline-block"/>Fermé
@@ -961,9 +1020,12 @@ function AbonnesTab() {
                           ) : abonne ? (
                             <button onClick={() => handleCellClick(dow, hour)}
                               className="w-full h-10 rounded-xl text-xs font-bold truncate px-1 transition-all hover:opacity-80"
-                              style={{ background:'#eff6ff', border:'1px solid #bfdbfe', color:'#2563eb' }}
-                              title={abonne.player_name}>
+                              style={isExpired(abonne)
+                                ? { background:'#f9fafb', border:'1px solid #e5e7eb', color:'#9ca3af' }
+                                : { background:'#eff6ff', border:'1px solid #bfdbfe', color:'#2563eb' }}
+                              title={`${abonne.player_name}${isExpired(abonne) ? ' — Expiré' : ''}`}>
                               {abonne.player_name.split(' ')[0]}
+                              {isExpired(abonne) && <span className="ml-0.5">⚠</span>}
                             </button>
                           ) : (
                             <button onClick={() => handleCellClick(dow, hour)}
@@ -1026,9 +1088,57 @@ function AbonnesTab() {
                   <div className="relative">
                     <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
                     <input value={addForm.player_phone} type="tel"
-                      onChange={e => setAddForm(f => ({...f, player_phone: e.target.value}))}
+                      onChange={e => setAddForm(f => ({...f, player_phone: e.target.value.replace(/[^0-9+\s]/g,'')}))}
                       placeholder="+212 6XX XXX XXX"
                       className="w-full pl-9 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-gray-900 text-sm font-medium outline-none transition-all"/>
+                  </div>
+                </div>
+
+                {/* Dates */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Début *</label>
+                    <div className="relative">
+                      <Calendar size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
+                      <input type="date" value={addForm.start_date}
+                        onChange={e => setAddForm(f => ({...f, start_date: e.target.value}))}
+                        className="w-full pl-9 pr-2 py-3 rounded-xl border-2 border-gray-200 focus:border-gray-900 text-sm font-medium outline-none transition-all"/>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Fin</label>
+                    <div className="relative">
+                      <CalendarClock size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
+                      <input type="date" value={addForm.end_date}
+                        min={addForm.start_date}
+                        onChange={e => setAddForm(f => ({...f, end_date: e.target.value}))}
+                        className="w-full pl-9 pr-2 py-3 rounded-xl border-2 border-gray-200 focus:border-gray-900 text-sm font-medium outline-none transition-all"/>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Raccourcis durée */}
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">Raccourcis</label>
+                  <div className="flex gap-2">
+                    {[['1M', 1], ['3M', 3], ['6M', 6], ['1 An', 12]].map(([label, months]) => (
+                      <button key={label} type="button" onClick={() => applyDuration(months)}
+                        className="flex-1 py-2 rounded-xl text-xs font-black border-2 transition-all hover:scale-105"
+                        style={
+                          (() => {
+                            if (!addForm.end_date || !addForm.start_date) return { border:'2px solid #e5e7eb', color:'#374151', background:'#f9fafb' }
+                            const d = new Date(addForm.start_date)
+                            d.setMonth(d.getMonth() + months)
+                            const expected = d.toISOString().split('T')[0]
+                            const isActive = addForm.end_date === expected
+                            return isActive
+                              ? { border:'2px solid #111827', background:'#111827', color:'white' }
+                              : { border:'2px solid #e5e7eb', color:'#374151', background:'#f9fafb' }
+                          })()
+                        }>
+                        {label}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -1072,7 +1182,22 @@ function AbonnesTab() {
               </div>
 
               <div>
-                <p className="text-xl font-black text-gray-900">{infoModal.player_name}</p>
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-xl font-black text-gray-900">{infoModal.player_name}</p>
+                  {/* Statut badge */}
+                  {infoModal.end_date && (() => {
+                    const d = daysLeft(infoModal)
+                    if (d < 0) return (
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full shrink-0" style={{background:'#fef2f2',color:'#dc2626'}}>Expiré</span>
+                    )
+                    if (d <= 7) return (
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full shrink-0" style={{background:'#fffbeb',color:'#d97706'}}>⚠ {d}j restants</span>
+                    )
+                    return (
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full shrink-0" style={{background:'#f0fdf4',color:'#16a34a'}}>✓ Actif</span>
+                    )
+                  })()}
+                </div>
                 <p className="text-sm text-gray-400 mt-1 flex items-center gap-2">
                   <Clock size={13}/>
                   {infoModal.start_time?.slice(0,5)} – {infoModal.end_time?.slice(0,5)}
@@ -1083,6 +1208,24 @@ function AbonnesTab() {
                   <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
                     <Phone size={13}/> {infoModal.player_phone}
                   </p>
+                )}
+                {/* Dates abonnement */}
+                {(infoModal.start_date || infoModal.end_date) && (
+                  <div className="flex items-center gap-3 mt-3 p-3 rounded-xl" style={{background:'#f9fafb', border:'1px solid #f0f0f0'}}>
+                    {infoModal.start_date && (
+                      <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                        <Calendar size={12} className="text-gray-400"/>
+                        <span>Début : <strong className="text-gray-800">{new Date(infoModal.start_date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'})}</strong></span>
+                      </div>
+                    )}
+                    {infoModal.start_date && infoModal.end_date && <span className="text-gray-300">→</span>}
+                    {infoModal.end_date && (
+                      <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                        <CalendarClock size={12} className="text-gray-400"/>
+                        <span>Fin : <strong className="text-gray-800">{new Date(infoModal.end_date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'})}</strong></span>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
 

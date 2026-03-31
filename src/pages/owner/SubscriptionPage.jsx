@@ -18,7 +18,7 @@ const PLANS = [
       'Accès complet au tableau de bord',
       'Gestion de terrains illimitée',
       'Système de réservation en ligne',
-      'Support email',
+      'Lien de réservation personnalisé',
     ],
   },
   {
@@ -27,10 +27,11 @@ const PLANS = [
     save: 'Économie de 200 DH',
     popular: false,
     features: [
-      'Tout le plan mensuel',
       'Économie de 200 DH',
-      'Système de tournois',
-      'Statistiques avancées',
+      'Accès complet au tableau de bord',
+      'Gestion de terrains illimitée',
+      'Système de réservation en ligne',
+      'Lien de réservation personnalisé',
     ],
   },
   {
@@ -39,10 +40,11 @@ const PLANS = [
     save: 'Économie de 600 DH',
     popular: true,
     features: [
-      'Tout le plan trimestriel',
       'Économie de 600 DH',
       'Lien de réservation personnalisé',
-      'Notifications WhatsApp',
+      'Accès complet au tableau de bord',
+      'Gestion de terrains illimitée',
+      'Système de réservation en ligne',
     ],
   },
   {
@@ -51,10 +53,11 @@ const PLANS = [
     save: 'Économie de 1,800 DH',
     popular: false,
     features: [
-      'Tout le plan 6 mois',
       'Économie de 1,800 DH',
-      'Support prioritaire 24/7',
-      'Nouvelles fonctionnalités en premier',
+      'Lien de réservation personnalisé',
+      'Accès complet au tableau de bord',
+      'Gestion de terrains illimitée',
+      'Système de réservation en ligne',
     ],
   },
 ]
@@ -79,8 +82,10 @@ export default function SubscriptionPage() {
     }
   }, [user, authLoading])
 
-  async function fetchSub() {
-    setLoading(true)
+  async function fetchSub(showSpinner = true) {
+    if (showSpinner) setLoading(true)
+    // Timeout de sécurité — évite le spinner infini sur mobile
+    const timer = showSpinner ? setTimeout(() => setLoading(false), 8000) : null
     try {
       const { data } = await supabase
         .from('subscriptions').select('*')
@@ -89,7 +94,7 @@ export default function SubscriptionPage() {
         .limit(1).single()
       setSub(data || null)
     } catch { setSub(null) }
-    finally { setLoading(false) }
+    finally { if (timer) clearTimeout(timer); if (showSpinner) setLoading(false) }
   }
 
   if (loading) return (
@@ -99,7 +104,7 @@ export default function SubscriptionPage() {
   )
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
 
       {/* ── Statut actuel ── */}
       {sub && (
@@ -135,14 +140,14 @@ export default function SubscriptionPage() {
       {/* ── Titre ── */}
       <div className="text-center">
         <p className="text-xs font-black tracking-widest text-green-500 uppercase mb-2">Tarifs transparents</p>
-        <h1 className="text-3xl font-black text-gray-900">Choisissez votre plan</h1>
+        <h1 className="text-2xl sm:text-3xl font-black text-gray-900">Choisissez votre plan</h1>
         <p className="text-gray-400 text-sm mt-2">
           Paiement par virement bancaire marocain. Aucune carte requise.
         </p>
       </div>
 
       {/* ── Grille des plans ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {PLANS.map((plan, i) => {
           const isCurrent = sub?.plan === plan.id && sub?.status === 'active'
           const isSelected = selected?.id === plan.id
@@ -227,7 +232,7 @@ export default function SubscriptionPage() {
             onSuccess={() => {
               setShowPayment(false)
               setShowSuccess(true)
-              fetchSub()
+              fetchSub(false) // pas de spinner — page déjà visible
             }}
           />
         )}
