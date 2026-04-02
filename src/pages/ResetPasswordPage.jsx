@@ -82,14 +82,24 @@ export default function ResetPasswordPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error('Session expirée. Demandez un nouveau lien de réinitialisation.')
 
-      // Update password with 15s timeout
-      const { error: updateErr } = await Promise.race([
-        supabase.auth.updateUser({ password }),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Délai dépassé. Veuillez réessayer.')), 15000)
-        )
-      ])
-      if (updateErr) throw updateErr
+      // Direct REST call to avoid Supabase client lock issues with manual sessions
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/auth/v1/user`,
+        {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({ password }),
+          signal: AbortSignal.timeout(15000),
+        }
+      )
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.msg || err.message || 'Erreur lors de la mise à jour.')
+      }
 
       setSuccess(true)
       setTimeout(() => navigate('/auth'), 2000)
