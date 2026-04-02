@@ -17,17 +17,43 @@ export default function ResetPasswordPage() {
   const [error, setError]             = useState('')
   const [sessionReady, setSessionReady] = useState(false)
 
-  // Supabase gère automatiquement le token depuis le hash de l'URL
   useEffect(() => {
+    // 1. Lire le hash directement depuis l'URL (#access_token=...&type=recovery)
+    const hash   = window.location.hash.substring(1)
+    const params = new URLSearchParams(hash)
+    const type         = params.get('type')
+    const accessToken  = params.get('access_token')
+    const refreshToken = params.get('refresh_token') || ''
+
+    if (accessToken && (type === 'recovery' || type === 'signup')) {
+      // Établir la session manuellement avec les tokens du hash
+      supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+        .then(({ data, error }) => {
+          if (!error && data?.session) {
+            setSessionReady(true)
+            // Nettoyer le hash de l'URL sans recharger
+            window.history.replaceState(null, '', window.location.pathname)
+          } else {
+            setError('Lien expiré ou invalide. Veuillez refaire la demande.')
+            setSessionReady(false)
+          }
+        })
+      return
+    }
+
+    // 2. Fallback: écouter onAuthStateChange (si déjà connecté)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
+      if (['PASSWORD_RECOVERY', 'SIGNED_IN', 'TOKEN_REFRESHED'].includes(event) && session) {
         setSessionReady(true)
       }
     })
 
-    // Vérifier si déjà connecté (cas où le token est déjà consommé)
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) setSessionReady(true)
+      else if (!accessToken) {
+        // Pas de token du tout → rediriger
+        setError('Aucun lien de réinitialisation détecté.')
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -110,18 +136,27 @@ export default function ResetPasswordPage() {
               </motion.div>
 
             ) : !sessionReady ? (
-              /* ── Attente token ── */
+              /* ── Attente token / Erreur ── */
               <div className="text-center py-8">
-                <Loader2 size={32} className="animate-spin text-green-500 mx-auto mb-4"/>
-                <p className="text-sm text-gray-500 font-medium">
-                  Vérification du lien de réinitialisation...
-                </p>
-                <p className="text-xs text-gray-400 mt-2">
-                  Si cette page reste bloquée, le lien a peut-être expiré.
-                </p>
+                {error ? (
+                  <>
+                    <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                      <AlertCircle size={28} className="text-red-500"/>
+                    </div>
+                    <p className="text-sm font-bold text-gray-800 mb-1">Lien invalide ou expiré</p>
+                    <p className="text-xs text-gray-400 mb-4">{error}</p>
+                  </>
+                ) : (
+                  <>
+                    <Loader2 size={32} className="animate-spin text-green-500 mx-auto mb-4"/>
+                    <p className="text-sm text-gray-500 font-medium">
+                      Vérification du lien...
+                    </p>
+                  </>
+                )}
                 <button onClick={() => navigate('/auth')}
-                  className="mt-4 text-xs font-bold text-green-600 hover:underline flex items-center gap-1 mx-auto">
-                  <ArrowLeft size={12}/> Retour à la connexion
+                  className="mt-4 text-sm font-bold text-green-600 hover:underline flex items-center gap-1 mx-auto">
+                  <ArrowLeft size={14}/> Retour à la connexion
                 </button>
               </div>
 
