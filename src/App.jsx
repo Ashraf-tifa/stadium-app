@@ -86,6 +86,7 @@ function PrivateRoute({ children, role }) {
 
   if (loading) return <Spinner/>
   if (!user) return <Navigate to="/auth" replace/>
+  if (user && !profile) return <Spinner/>  // wait for profile to load
   if (role && profile?.role !== role) return <Navigate to="/auth" replace/>
   return children
 }
