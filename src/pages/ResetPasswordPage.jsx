@@ -78,13 +78,21 @@ export default function ResetPasswordPage() {
 
     setLoading(true)
     try {
-      const { error: updateErr } = await supabase.auth.updateUser({ password })
+      // Verify session is still valid
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Session expirée. Demandez un nouveau lien de réinitialisation.')
+
+      // Update password with 15s timeout
+      const { error: updateErr } = await Promise.race([
+        supabase.auth.updateUser({ password }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Délai dépassé. Veuillez réessayer.')), 15000)
+        )
+      ])
       if (updateErr) throw updateErr
+
       setSuccess(true)
-      setTimeout(() => {
-        supabase.auth.signOut().catch(() => {})
-        navigate('/auth')
-      }, 2000)
+      setTimeout(() => navigate('/auth'), 2000)
     } catch (err) {
       setError(err.message || 'Erreur lors de la mise à jour.')
     } finally {
