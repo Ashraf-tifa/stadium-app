@@ -34,9 +34,10 @@ export function AuthProvider({ children }) {
       async (event, session) => {
         if (!isMounted) return
         if (
-          event === 'INITIAL_SESSION' ||
-          event === 'SIGNED_IN'       ||
-          event === 'TOKEN_REFRESHED'
+          event === 'INITIAL_SESSION'  ||
+          event === 'SIGNED_IN'        ||
+          event === 'TOKEN_REFRESHED'  ||
+          event === 'PASSWORD_RECOVERY'
         ) {
           const u = session?.user ?? null
           setUser(u)
@@ -59,7 +60,7 @@ export function AuthProvider({ children }) {
             setProfile(null)
           }
           if (isMounted) setLoading(false)
-        } else if (event === 'SIGNED_OUT' || event === 'PASSWORD_RECOVERY') {
+        } else if (event === 'SIGNED_OUT') {
           setUser(null)
           setProfile(null)
           if (isMounted) setLoading(false)
