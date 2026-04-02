@@ -81,9 +81,10 @@ export default function ResetPasswordPage() {
       const { error: updateErr } = await supabase.auth.updateUser({ password })
       if (updateErr) throw updateErr
       setSuccess(true)
-      // Déconnecter la session recovery pour permettre une connexion propre
-      await supabase.auth.signOut({ scope: 'local' })
-      setTimeout(() => navigate('/auth'), 2500)
+      setTimeout(() => {
+        supabase.auth.signOut().catch(() => {})
+        navigate('/auth')
+      }, 2000)
     } catch (err) {
       setError(err.message || 'Erreur lors de la mise à jour.')
     } finally {
