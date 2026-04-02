@@ -3,11 +3,12 @@ import { Component, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
-const AuthPage          = lazy(() => import('./pages/AuthPage'))
-const OwnerDashboard    = lazy(() => import('./pages/owner/OwnerDashboard'))
-const AdminDashboard    = lazy(() => import('./pages/admin/AdminDashboard'))
-const BookingPublicPage = lazy(() => import('./pages/public/BookingPublicPage'))
-const LandingPage       = lazy(() => import('./pages/LandingPage'))
+const AuthPage           = lazy(() => import('./pages/AuthPage'))
+const OwnerDashboard     = lazy(() => import('./pages/owner/OwnerDashboard'))
+const AdminDashboard     = lazy(() => import('./pages/admin/AdminDashboard'))
+const BookingPublicPage  = lazy(() => import('./pages/public/BookingPublicPage'))
+const LandingPage        = lazy(() => import('./pages/LandingPage'))
+const ResetPasswordPage  = lazy(() => import('./pages/ResetPasswordPage'))
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props)
@@ -128,8 +129,9 @@ function App() {
 
          
           <Route path="/dashboard" element={<Navigate to="/app" replace/>}/>
-          <Route path="/book/:ownerId" element={<BookingPublicPage/>}/>
-          <Route path="*"          element={<Navigate to="/" replace/>}/>
+          <Route path="/book/:ownerId"   element={<BookingPublicPage/>}/>
+          <Route path="/reset-password" element={<ResetPasswordPage/>}/>
+          <Route path="*"               element={<Navigate to="/" replace/>}/>
         </Routes>
           </Suspense>
         </ErrorBoundary>
