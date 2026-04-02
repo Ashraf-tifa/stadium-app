@@ -1,0 +1,14 @@
+# Ce workflow désactive GitHub Pages — le site est hébergé sur Vercel
+# This overrides the automatic Pages deployment
+name: Disable GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  skip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Site hosted on Vercel
+        run: echo "✅ Deployment handled by Vercel — GitHub Pages disabled."
