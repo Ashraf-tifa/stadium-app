@@ -21,18 +21,11 @@ export default function AuthPage() {
 
   // Redirect automatically when user + profile are ready
   useEffect(() => {
-    if (authLoading) return
+    if (authLoading) return          // wait for profile to finish loading
     if (!user) { setLoading(false); return }
-    if (!profile) {
-      // Profile failed to load after auth — show error and reset
-      setError('Erreur de connexion. Veuillez réessayer.')
-      setLoading(false)
-      supabase.auth.signOut()
-      return
-    }
+    if (!profile) { setLoading(false); return }  // profile still loading — wait
     if (profile.role === 'admin') navigate('/admin', { replace: true })
-    else if (profile.role === 'owner') navigate('/dashboard/owner', { replace: true })
-    else { setLoading(false) }
+    else navigate('/dashboard/owner', { replace: true })  // owner or any role
   }, [user, profile, authLoading])
 
   function switchMode(m) { setMode(m); setError(''); setSuccess('') }
