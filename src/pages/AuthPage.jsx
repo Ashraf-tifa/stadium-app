@@ -8,6 +8,7 @@ import {
   ChevronLeft, User, Phone, Zap
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { supabase } from '../lib/supabase'
 export default function AuthPage() {
   const [mode, setMode]         = useState('login')
   const [loading, setLoading]   = useState(false)
@@ -34,6 +35,8 @@ async function handleLogin(e) {
   setLoading(true)
   const fd = new FormData(e.target)
   try {
+    // Nettoyer toute session recovery résiduelle avant de se connecter
+    await supabase.auth.signOut({ scope: 'local' })
     await signIn({ email: fd.get('email'), password: fd.get('password') })
     // navigation is handled by the useEffect above once user+profile are ready
   } catch (err) {
