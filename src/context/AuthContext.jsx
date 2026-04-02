@@ -39,7 +39,6 @@ export function AuthProvider({ children }) {
           event === 'TOKEN_REFRESHED'  ||
           event === 'PASSWORD_RECOVERY'
         ) {
-          setLoading(true) // signal that profile is being fetched
           const u = session?.user ?? null
           setUser(u)
           if (u) {
