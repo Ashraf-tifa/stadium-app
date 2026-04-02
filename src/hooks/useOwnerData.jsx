@@ -17,26 +17,35 @@ export function useOwnerStats() {
   async function fetchStats() {
     setLoading(true)
     try {
-      const { data: stadiums } = await supabase
+      // Tous les terrains (actifs + inactifs) pour les revenus complets
+      const { data: allStadiums } = await supabase
         .from('stadiums')
-        .select('id')
+        .select('id, is_active')
         .eq('owner_id', user.id)
-        .eq('is_active', true)
 
-      const stadiumIds = stadiums?.map(s => s.id) || []
+      const allIds    = allStadiums?.map(s => s.id) || []
+      const activeIds = allStadiums?.filter(s => s.is_active).map(s => s.id) || []
 
-      const startOfMonth = new Date()
-      startOfMonth.setDate(1)
-      startOfMonth.setHours(0, 0, 0, 0)
+      // Filtrer par booking_date (date de la séance) — pas created_at
+      const now  = new Date()
+      const year = now.getFullYear()
+      const mon  = now.getMonth() // 0-indexed
 
-      // ✅ Guard — pas de terrains → pas de query bookings
+      // Premier jour du mois courant
+      const monthStart = `${year}-${String(mon + 1).padStart(2, '0')}-01`
+      // Premier jour du mois SUIVANT (évite les dates invalides genre 31 avril)
+      const nextMonthDate = new Date(year, mon + 1, 1)
+      const monthEndExcl  = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, '0')}-01`
+
+      // ✅ Inclure tous les terrains (même inactifs) pour les finances
       let bookings = []
-      if (stadiumIds.length > 0) {
+      if (allIds.length > 0) {
         const { data } = await supabase
           .from('bookings')
-          .select('id, total_price, status, created_at')
-          .in('stadium_id', stadiumIds)
-          .gte('created_at', startOfMonth.toISOString())
+          .select('id, total_price, status, booking_date')
+          .in('stadium_id', allIds)
+          .gte('booking_date', monthStart)
+          .lt('booking_date', monthEndExcl)   // lt = strictement < premier du mois suivant
         bookings = data || []
       }
 
@@ -48,12 +57,17 @@ export function useOwnerStats() {
 
       const revenue = bookings
         .filter(b => b.status === 'confirmed')
-        .reduce((sum, b) => sum + Number(b.total_price), 0)
+        .reduce((sum, b) => sum + Number(b.total_price || 0), 0)
+
+      const pendingRevenue = bookings
+        .filter(b => b.status === 'pending')
+        .reduce((sum, b) => sum + Number(b.total_price || 0), 0)
 
       setStats({
-        activeStadiums:    stadiumIds.length,
+        activeStadiums:    activeIds.length,   // seulement actifs pour le compteur
         totalBookings:     bookings.length,
         monthlyRevenue:    revenue,
+        pendingRevenue,
         activeTournaments: tournaments?.length || 0,
       })
     } catch (err) {

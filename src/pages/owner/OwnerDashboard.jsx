@@ -351,20 +351,24 @@ function OverviewTab({ setTab }) {
 
   const STATS = [
     { label: 'Terrains actifs',  value: stats?.activeStadiums,
+      sub: null,
       icon: Building2,          accent: '#16a34a', bg: '#f0fdf4', iconColor: '#16a34a' },
-    { label: 'Réservations',    value: stats?.totalBookings,
+    { label: 'Réservations ce mois', value: stats?.totalBookings,
+      sub: null,
       icon: CalendarCheck,      accent: '#2563eb', bg: '#eff6ff', iconColor: '#2563eb' },
-    { label: 'Revenus du mois',
+    { label: 'Revenus confirmés',
       value: stats?.monthlyRevenue != null ? `${Number(stats.monthlyRevenue).toLocaleString()} DH` : '0 DH',
+      sub: stats?.pendingRevenue > 0 ? `+ ${Number(stats.pendingRevenue).toLocaleString()} DH en attente` : null,
       icon: CircleDollarSign,   accent: '#d97706', bg: '#fffbeb', iconColor: '#d97706' },
     { label: 'Tournois actifs', value: stats?.activeTournaments,
+      sub: null,
       icon: Trophy,             accent: '#7c3aed', bg: '#f5f3ff', iconColor: '#7c3aed' },
   ]
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {STATS.map(({ label, value, icon: Icon, accent, bg, iconColor }, i) => (
+        {STATS.map(({ label, value, sub, icon: Icon, accent, bg, iconColor }, i) => (
           <div key={i} className="bg-white rounded-2xl p-5 relative overflow-hidden"
             style={{ border: '1px solid #f0f0f0' }}>
             <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style={{ background: accent }}/>
@@ -378,6 +382,7 @@ function OverviewTab({ setTab }) {
               : <p className="text-3xl font-black text-gray-900">{value ?? '—'}</p>
             }
             <p className="text-xs text-gray-400 font-semibold mt-1.5 uppercase tracking-wide">{label}</p>
+            {sub && <p className="text-xs font-semibold mt-1" style={{ color: '#d97706' }}>{sub}</p>}
           </div>
         ))}
       </div>

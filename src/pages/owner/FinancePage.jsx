@@ -278,54 +278,73 @@ export default function FinancePage() {
             </div>
           </div>
 
-          {/* ── Liste réservations confirmées du mois ── */}
+          {/* ── Liste toutes réservations du mois ── */}
           <div className="bg-white rounded-2xl overflow-hidden" style={{ border: '1px solid #f0f0f0' }}>
             <div className="flex items-center justify-between px-5 py-4"
               style={{ borderBottom: '1px solid #f5f5f5' }}>
               <h3 className="font-black text-gray-900 text-sm flex items-center gap-2">
                 <CalendarCheck size={15} className="text-green-600"/>
-                Réservations confirmées — {MONTHS_FR[selectedMonth]}
+                Réservations — {MONTHS_FR[selectedMonth]}
               </h3>
               <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">
-                {confirmed.length} rés. · {monthRevenue.toLocaleString()} DH
+                {monthBookings.length} rés.
               </span>
             </div>
 
-            {confirmed.length === 0 ? (
+            {monthBookings.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-gray-300">
                 <CalendarCheck size={24} className="mb-2"/>
-                <p className="text-sm font-semibold">Aucune réservation confirmée ce mois</p>
+                <p className="text-sm font-semibold">Aucune réservation ce mois</p>
+                <p className="text-xs mt-1">Cliquez sur un mois du graphique pour voir ses données</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-50">
-                {confirmed.map((b, i) => (
-                  <motion.div key={b.id}
-                    initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.03 }}
-                    className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
-                        <CheckCircle2 size={13} className="text-green-600"/>
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-bold text-gray-900 truncate">
-                            {b.booker_name || b.profiles?.full_name || '—'}
-                          </span>
-                          {(b.booker_phone || b.profiles?.phone) && (
-                            <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full shrink-0">
-                              📞 {b.booker_phone || b.profiles?.phone}
-                            </span>
-                          )}
+                {[...confirmed, ...pending, ...cancelled].map((b, i) => {
+                  const isConf = b.status === 'confirmed'
+                  const isPend = b.status === 'pending'
+                  const isCan  = b.status === 'cancelled'
+                  return (
+                    <motion.div key={b.id}
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                      transition={{ delay: i * 0.03 }}
+                      className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                          isConf ? 'bg-green-50' : isPend ? 'bg-amber-50' : 'bg-red-50'
+                        }`}>
+                          {isConf ? <CheckCircle2 size={13} className="text-green-600"/>
+                            : isPend ? <Clock size={13} className="text-amber-600"/>
+                            : <XCircle size={13} className="text-red-500"/>}
                         </div>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {b.stadiums?.name} · {b.booking_date} · {b.start_time?.slice(0,5)}–{b.end_time?.slice(0,5)}
-                        </p>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`text-sm font-bold truncate ${isCan ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
+                              {b.booker_name || b.profiles?.full_name || '—'}
+                            </span>
+                            {(b.booker_phone || b.profiles?.phone) && (
+                              <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full shrink-0">
+                                📞 {b.booker_phone || b.profiles?.phone}
+                              </span>
+                            )}
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                              isConf ? 'bg-green-100 text-green-700'
+                                : isPend ? 'bg-amber-100 text-amber-700'
+                                : 'bg-red-100 text-red-600'
+                            }`}>
+                              {isConf ? '✓ Confirmé' : isPend ? '⏳ En attente' : '✗ Annulé'}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {b.stadiums?.name} · {b.booking_date} · {b.start_time?.slice(0,5)}–{b.end_time?.slice(0,5)}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <p className="text-sm font-black text-gray-900">{Number(b.total_price).toLocaleString()} DH</p>
-                  </motion.div>
-                ))}
+                      <p className={`text-sm font-black shrink-0 ${isCan ? 'text-red-400 line-through' : isConf ? 'text-gray-900' : 'text-amber-600'}`}>
+                        {Number(b.total_price || 0).toLocaleString()} DH
+                      </p>
+                    </motion.div>
+                  )
+                })}
               </div>
             )}
           </div>
