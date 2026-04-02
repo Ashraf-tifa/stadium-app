@@ -18,45 +18,54 @@ export default function ResetPasswordPage() {
   const [sessionReady, setSessionReady] = useState(false)
 
   useEffect(() => {
-    // 1. Lire le hash directement depuis l'URL (#access_token=...&type=recovery)
-    const hash   = window.location.hash.substring(1)
-    const params = new URLSearchParams(hash)
-    const type         = params.get('type')
-    const accessToken  = params.get('access_token')
-    const refreshToken = params.get('refresh_token') || ''
+    let unsubscribe = () => {}
 
-    if (accessToken && (type === 'recovery' || type === 'signup')) {
-      // Établir la session manuellement avec les tokens du hash
-      supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
-        .then(({ data, error }) => {
-          if (!error && data?.session) {
-            setSessionReady(true)
-            // Nettoyer le hash de l'URL sans recharger
-            window.history.replaceState(null, '', window.location.pathname)
-          } else {
-            setError('Lien expiré ou invalide. Veuillez refaire la demande.')
-            setSessionReady(false)
-          }
+    async function init() {
+      // 1. Écouter les événements auth EN PREMIER (avant tout)
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        console.log('[ResetPwd] auth event:', event)
+        if (['PASSWORD_RECOVERY', 'SIGNED_IN', 'TOKEN_REFRESHED'].includes(event) && session) {
+          setSessionReady(true)
+          window.history.replaceState(null, '', window.location.pathname)
+        }
+      })
+      unsubscribe = subscription.unsubscribe
+
+      // 2. Lire le hash de l'URL
+      const hash   = window.location.hash.substring(1)
+      const params = new URLSearchParams(hash)
+      const accessToken  = params.get('access_token')
+      const refreshToken = params.get('refresh_token') || ''
+
+      console.log('[ResetPwd] hash access_token:', !!accessToken)
+
+      if (accessToken) {
+        // Établir la session depuis les tokens du hash (peu importe le type)
+        const { data, error: sessionErr } = await supabase.auth.setSession({
+          access_token:  accessToken,
+          refresh_token: refreshToken,
         })
-      return
+        console.log('[ResetPwd] setSession result:', data?.session?.user?.email, sessionErr?.message)
+        if (!sessionErr && data?.session) {
+          setSessionReady(true)
+          window.history.replaceState(null, '', window.location.pathname)
+        } else {
+          setError('Lien expiré ou invalide. Veuillez refaire la demande.')
+        }
+        return
+      }
+
+      // 3. Pas de hash → vérifier session existante
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        setSessionReady(true)
+      } else {
+        setError('Aucun lien de réinitialisation détecté. Veuillez refaire la demande.')
+      }
     }
 
-    // 2. Fallback: écouter onAuthStateChange (si déjà connecté)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (['PASSWORD_RECOVERY', 'SIGNED_IN', 'TOKEN_REFRESHED'].includes(event) && session) {
-        setSessionReady(true)
-      }
-    })
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setSessionReady(true)
-      else if (!accessToken) {
-        // Pas de token du tout → rediriger
-        setError('Aucun lien de réinitialisation détecté.')
-      }
-    })
-
-    return () => subscription.unsubscribe()
+    init()
+    return () => unsubscribe()
   }, [])
 
   async function handleSubmit(e) {
