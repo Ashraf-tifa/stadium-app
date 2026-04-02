@@ -40,10 +40,26 @@ export function AuthProvider({ children }) {
         ) {
           const u = session?.user ?? null
           setUser(u)
-          if (u) await loadProfile(u.id)
-          else setProfile(null)
+          if (u) {
+            // Retry profile fetch up to 3 times (handles RLS timing issues)
+            let profile = null
+            for (let i = 0; i < 3; i++) {
+              try {
+                const { data } = await supabase
+                  .from('profiles')
+                  .select('id, full_name, phone, role, is_active, avatar_url, subscription_plan, subscription_until')
+                  .eq('id', u.id)
+                  .single()
+                if (data) { profile = data; break }
+              } catch { /* retry */ }
+              if (i < 2) await new Promise(r => setTimeout(r, 500))
+            }
+            if (isMounted) setProfile(profile)
+          } else {
+            setProfile(null)
+          }
           if (isMounted) setLoading(false)
-        } else if (event === 'SIGNED_OUT') {
+        } else if (event === 'SIGNED_OUT' || event === 'PASSWORD_RECOVERY') {
           setUser(null)
           setProfile(null)
           if (isMounted) setLoading(false)

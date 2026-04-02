@@ -22,9 +22,17 @@ export default function AuthPage() {
   // Redirect automatically when user + profile are ready
   useEffect(() => {
     if (authLoading) return
-    if (!user || !profile?.role) return
+    if (!user) { setLoading(false); return }
+    if (!profile) {
+      // Profile failed to load after auth — show error and reset
+      setError('Erreur de connexion. Veuillez réessayer.')
+      setLoading(false)
+      supabase.auth.signOut()
+      return
+    }
     if (profile.role === 'admin') navigate('/admin', { replace: true })
     else if (profile.role === 'owner') navigate('/dashboard/owner', { replace: true })
+    else { setLoading(false) }
   }, [user, profile, authLoading])
 
   function switchMode(m) { setMode(m); setError(''); setSuccess('') }
@@ -35,8 +43,6 @@ async function handleLogin(e) {
   setLoading(true)
   const fd = new FormData(e.target)
   try {
-    // Nettoyer toute session recovery résiduelle avant de se connecter
-    await supabase.auth.signOut({ scope: 'local' })
     await signIn({ email: fd.get('email'), password: fd.get('password') })
     // navigation is handled by the useEffect above once user+profile are ready
   } catch (err) {
