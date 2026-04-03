@@ -4,66 +4,65 @@ import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext({})
 
+const PROFILE_SELECT = 'id, full_name, phone, role, is_active, avatar_url, subscription_plan, subscription_until'
+
 export function AuthProvider({ children }) {
-  const [user, setUser]       = useState(null)
+  const [user,    setUser]    = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  async function loadProfile(userId) {
+  async function fetchProfile(userId) {
     try {
       const { data } = await supabase
         .from('profiles')
-        .select('id, full_name, phone, role, is_active, avatar_url, subscription_plan, subscription_until')
+        .select(PROFILE_SELECT)
         .eq('id', userId)
         .single()
-      setProfile(data || null)
+      return data || null
     } catch {
-      setProfile(null)
+      return null
     }
   }
 
   async function refreshProfile() {
-    if (user) await loadProfile(user.id)
+    if (!user) return
+    const p = await fetchProfile(user.id)
+    setProfile(p)
   }
 
   useEffect(() => {
     let isMounted = true
+    // fetchId prevents race conditions between concurrent auth events
+    let fetchId = 0
 
-    // Une seule source de vérité — onAuthStateChange gère INITIAL_SESSION en interne
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!isMounted) return
-        if (
-          event === 'INITIAL_SESSION'  ||
-          event === 'SIGNED_IN'        ||
-          event === 'TOKEN_REFRESHED'  ||
-          event === 'PASSWORD_RECOVERY'
-        ) {
-          const u = session?.user ?? null
-          setUser(u)
-          if (u) {
-            // Retry profile fetch up to 3 times (handles RLS timing issues)
-            let profile = null
-            for (let i = 0; i < 3; i++) {
-              try {
-                const { data } = await supabase
-                  .from('profiles')
-                  .select('id, full_name, phone, role, is_active, avatar_url, subscription_plan, subscription_until')
-                  .eq('id', u.id)
-                  .single()
-                if (data) { profile = data; break }
-              } catch { /* retry */ }
-              if (i < 2) await new Promise(r => setTimeout(r, 500))
-            }
-            if (isMounted) setProfile(profile)
-          } else {
-            setProfile(null)
-          }
-          if (isMounted) setLoading(false)
-        } else if (event === 'SIGNED_OUT') {
+
+        if (event === 'SIGNED_OUT') {
           setUser(null)
           setProfile(null)
           if (isMounted) setLoading(false)
+          return
+        }
+
+        if (['INITIAL_SESSION', 'SIGNED_IN', 'TOKEN_REFRESHED', 'PASSWORD_RECOVERY'].includes(event)) {
+          const u = session?.user ?? null
+          setUser(u)
+
+          if (!u) {
+            setProfile(null)
+            if (isMounted) setLoading(false)
+            return
+          }
+
+          // Single fast fetch — no retries that cause slowness
+          const myId = ++fetchId
+          const p = await fetchProfile(u.id)
+          if (isMounted && myId === fetchId) {
+            setProfile(p)
+            setLoading(false)
+          }
         }
       }
     )
@@ -73,6 +72,7 @@ export function AuthProvider({ children }) {
       subscription.unsubscribe()
     }
   }, [])
+
   async function signIn({ email, password }) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw error
@@ -91,27 +91,22 @@ export function AuthProvider({ children }) {
   }
 
   async function signOut() {
-    try {
-      await supabase.auth.signOut()
-    } catch (e) {
-      console.warn('signOut error ignored:', e)
-    }
-    // ✅ toujours vider le state
+    try { await supabase.auth.signOut() } catch { /* ignore */ }
     setUser(null)
     setProfile(null)
   }
 
   async function resetPassword(email) {
-    const redirectTo = `${window.location.origin}/reset-password`
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`
+    })
     if (error) throw error
   }
 
   return (
     <AuthContext.Provider value={{
       user, profile, loading,
-      signIn, signUp, signOut, resetPassword,
-      refreshProfile,
+      signIn, signUp, signOut, resetPassword, refreshProfile,
       isOwner: profile?.role === 'owner',
       isAdmin: profile?.role === 'admin',
     }}>

@@ -1,6 +1,6 @@
 // src/pages/AuthPage.jsx
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Mail, Lock, Eye, EyeOff, ArrowRight,
@@ -18,18 +18,17 @@ export default function AuthPage() {
   const [showConf, setShowConf] = useState(false)
   const { signIn, signUp, resetPassword, user, profile, loading: authLoading } = useAuth()
   const navigate = useNavigate()
-  const location = useLocation()
   const didNavigate = useRef(false)
 
-  // Redirect once when user + profile are ready — guarded by ref to avoid loop
+  // Redirect once when user + profile are ready
   useEffect(() => {
-    if (authLoading) return
-    if (!user || !profile) { setLoading(false); return }
+    if (authLoading || !user || !profile) return
     if (didNavigate.current) return
     didNavigate.current = true
+    setLoading(false)
     if (profile.role === 'admin') navigate('/admin', { replace: true })
     else navigate('/dashboard/owner', { replace: true })
-  }, [user, profile, authLoading, location.pathname])
+  }, [user, profile, authLoading])
 
   function switchMode(m) { setMode(m); setError(''); setSuccess('') }
   
